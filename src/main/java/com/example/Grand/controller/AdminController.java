@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('ROLE_ADMIN')")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
 public class AdminController {
     private final UserServices userServices;
 
@@ -42,5 +42,10 @@ public class AdminController {
     userServices.changeUserRoles(user,form);
     return "redirect:/admin";
 }
+    @PostMapping("/admin/user/delete/{id}")
+    public String deleteUser(@PathVariable("id") Long id) {
+        userServices.deleteUser(id);
+        return "redirect:/admin";
+    }
 
 }

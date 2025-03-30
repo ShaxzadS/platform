@@ -85,13 +85,14 @@
         <th>Бан</th>
         <th>Редактирование</th>
         <th>Подробная информация</th>
+        <th>Удаление</th> <!-- ✅ Новая колонка -->
     </tr>
     <#list users as user>
         <tr>
             <td>${user.email}</td>
             <td>${user.phoneNumber}</td>
             <td><#if user.active>Активен<#else>Неактивен</#if></td>
-            <td><#list user.roles as role>${role}<#sep>,</#list></td>
+            <td><#list user.roles as role>${role}<#sep>, </#list></td>
             <td>
                 <form action="/admin/user/ban/${user.id}" method="post">
                     <input type="hidden" name="_csrf" value="${_csrf.token}">
@@ -100,11 +101,29 @@
             </td>
             <td><a href="/admin/user/edit/${user.id}">Редактировать</a></td>
             <td><a href="/user/${user.id}">Подробная информация</a></td>
+            <td> <!-- ✅ Кнопка для удаления -->
+                <form action="/admin/user/delete/${user.id}" method="post">
+                    <input type="hidden" name="_csrf" value="${_csrf.token}">
+                    <input type="submit" value="Удалить" onclick="return confirm('Вы уверены, что хотите удалить пользователя?')">
+                </form>
+            </td>
         </tr>
     <#else>
-        <tr><td colspan="7" class="no-users">Пользователей нет</td></tr>
+        <tr><td colspan="8" class="no-users">Пользователей нет</td></tr>
     </#list>
 </table>
+<a href="/" style="
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+">
+    На главную
+</a>
+
 
 </body>
 </html>

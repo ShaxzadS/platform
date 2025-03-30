@@ -27,17 +27,18 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/product/**", "/images/**", "/registration","/user/**").permitAll() // Публичные страницы
-                        .anyRequest().authenticated() // Все остальные требуют аутентификации
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/login") // Кастомная страница логина
-                        .defaultSuccessUrl("/", true) // URL после успешного входа
-                        .permitAll() // Разрешите доступ к странице логина
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout") // URL для выхода (поменяйте на /logout)
-                        .logoutSuccessUrl("/login") // Перенаправление после успешного выхода
-                        .permitAll() // Разрешите доступ к выходу
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .permitAll()
                 );
 
 
@@ -60,4 +61,5 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(authenticationProvider());
     }
+
 }

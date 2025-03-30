@@ -2,7 +2,7 @@ package com.example.Grand.models;
 
 import jakarta.persistence.*;
 import com.example.Grand.models.enums.Role;
-import lombok.Data;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
@@ -11,7 +11,12 @@ import java.util.*;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"products","likes","comments"}) // или нужные поля
+
 public  class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,9 +30,6 @@ public  class User implements UserDetails {
     private String name;
     @Column(name = "active")
     private boolean active;
-//    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    @JoinColumn(name = "image_id")
-//    private Image avatar;
     @Column(name = "password",length = 1000)
     private String password;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
@@ -38,6 +40,17 @@ public  class User implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL,fetch = FetchType.EAGER, mappedBy = "user")
     private List<Product> products = new ArrayList<>();
     private LocalDateTime dateOfCreated;
+
+
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Like> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true
+    , fetch = FetchType.EAGER)
+    private List<Comment> comments = new ArrayList<>();
+
 
     @PrePersist
     public void init(){

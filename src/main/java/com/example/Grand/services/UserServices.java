@@ -5,14 +5,13 @@ import com.example.Grand.models.enums.Role;
 import com.example.Grand.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.security.Principal;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,11 +21,20 @@ public class   UserServices {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+
+
+
+
+    @Transactional
+    public User getUserWithRolesAndProducts(String email) {
+        return userRepository.findByEmailWithProducts(email);
+    }
+
     @Transactional
     public boolean createUser(User user) {
         try {
             String email = user.getEmail();
-            if (userRepository.findByEmail(email) != null) return false;
+            if (userRepository.findByEmailWithProducts(email) != null) return false;
             user.setActive(true);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             user.getRoles().add(Role.ROLE_USER);
@@ -41,7 +49,7 @@ public class   UserServices {
     public List<User> list(){
         return userRepository.findAll();
     }
-
+    @Transactional
     public void banUser(Long id) {
         User user = userRepository.findById(id).orElse(null);
         if (user != null){
@@ -55,7 +63,7 @@ public class   UserServices {
         }
         userRepository.save(user);
     }
-
+    @Transactional
     public void changeUserRoles(User user, Map<String, String> form) {
         Set<String> roles = Arrays.stream(Role.values())
                 .map(Role::name)
@@ -68,4 +76,22 @@ public class   UserServices {
         }
         userRepository.save(user);
     }
+    @Transactional
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+
+    @Transactional
+    public User getUserWithProductsById(Long id) {
+        return userRepository.findByIdWithProducts(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    }
+
+
+    public User getUserByPrincipal(Principal principal) {
+        return (User) userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
 }

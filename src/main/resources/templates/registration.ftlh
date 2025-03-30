@@ -79,8 +79,11 @@
 
 <!-- Display error message if it exists -->
 <#if errorMessage??>
-    <h2>${errorMessage}</h2>
+    <div style="color: red; text-align: center; margin-top: 20px;">
+        ${errorMessage}
+    </div>
 </#if>
+
 
 </body>
 </html>
