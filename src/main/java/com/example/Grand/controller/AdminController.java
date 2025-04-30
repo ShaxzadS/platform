@@ -1,51 +1,71 @@
 package com.example.Grand.controller;
 
-
 import com.example.Grand.models.User;
 import com.example.Grand.models.enums.Role;
 import com.example.Grand.services.UserServices;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
+@PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
 public class AdminController {
+
     private final UserServices userServices;
 
-
-    @GetMapping("/admin")
-    public String admin(Model model) {
-        model.addAttribute("users", userServices.list());
-        return "admin";
+    // Получить список всех пользователей
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/users")
+    public ResponseEntity<List<User>> getUsers() {
+        return ResponseEntity.ok(userServices.list());
     }
-    @PostMapping("/admin/user/ban/{id}")
-    public String userBan(@PathVariable("id") Long id){
+
+    // Забанить пользователя по ID
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/user/ban/{id}")
+    public ResponseEntity<String> banUser(@PathVariable Long id) {
         userServices.banUser(id);
-        return "redirect:/admin";
+        return ResponseEntity.ok("User banned");
     }
 
-    @GetMapping("/admin/user/edit/{user}")
-    public String userEdit(@PathVariable("user") User user, Model model){
-        model.addAttribute("user", user);
-        model.addAttribute("roles", Role.values());
-        return "user-edit";
+    // Получить одного пользователя + список ролей
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getUserDetails(@PathVariable("id") Long id) {
+        User user = userServices.getById(id)
+                .orElse(null);
+        if (user == null) return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(Map.of(
+                "user", user,
+                "roles", Role.values()
+        ));
     }
-@PostMapping("/admin/user/edit")
-    public String userEdit(@RequestParam("userId") User user, @RequestParam Map<String, String> form){
-    userServices.changeUserRoles(user,form);
-    return "redirect:/admin";
-}
-    @PostMapping("/admin/user/delete/{id}")
-    public String deleteUser(@PathVariable("id") Long id) {
+
+    // Изменить роли пользователя
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/user/edit")
+    public ResponseEntity<String> editUserRoles(@RequestParam("userId") Long userId,
+                                                @RequestParam Map<String, String> form) {
+        User user = userServices.getById(userId).orElse(null);
+        if (user == null) return ResponseEntity.notFound().build();
+
+        userServices.changeUserRoles(user, form);
+        return ResponseEntity.ok("User roles updated");
+    }
+
+    // Удалить пользователя
+    @DeleteMapping("/user/{id}")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         userServices.deleteUser(id);
-        return "redirect:/admin";
+        return ResponseEntity.ok("User deleted");
     }
-
 }

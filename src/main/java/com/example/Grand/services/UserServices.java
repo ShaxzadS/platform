@@ -5,7 +5,6 @@ import com.example.Grand.models.enums.Role;
 import com.example.Grand.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,14 +16,18 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class   UserServices {
+public class UserServices {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    public Optional<User> getUserByPrincipal(Principal principal) {
+        if (principal == null) {
+            return Optional.empty();
+        }
+        return userRepository.findByEmail(principal.getName());
+    }
 
-
-
-
+    // Остальной код остаётся без изменений
     @Transactional
     public User getUserWithRolesAndProducts(String email) {
         return userRepository.findByEmailWithProducts(email);
@@ -46,23 +49,26 @@ public class   UserServices {
             return false;
         }
     }
-    public List<User> list(){
+
+    public List<User> list() {
         return userRepository.findAll();
     }
+
     @Transactional
     public void banUser(Long id) {
         User user = userRepository.findById(id).orElse(null);
-        if (user != null){
-            if (user.isActive()){
+        if (user != null) {
+            if (user.isActive()) {
                 user.setActive(false);
-                log.info("Ban user with id = {}; email: {} ", user.getId(),user.getEmail());
-            }else {
+                log.info("Ban user with id = {}; email: {} ", user.getId(), user.getEmail());
+            } else {
                 user.setActive(true);
-                log.info("Unban user with id = {}; email: {} ", user.getId(),user.getEmail());
+                log.info("Unban user with id = {}; email: {} ", user.getId(), user.getEmail());
             }
+            userRepository.save(user);
         }
-        userRepository.save(user);
     }
+
     @Transactional
     public void changeUserRoles(User user, Map<String, String> form) {
         Set<String> roles = Arrays.stream(Role.values())
@@ -76,11 +82,11 @@ public class   UserServices {
         }
         userRepository.save(user);
     }
+
     @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-
 
     @Transactional
     public User getUserWithProductsById(Long id) {
@@ -88,10 +94,33 @@ public class   UserServices {
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
+    public Optional<User> getById(Long id) {
+        return userRepository.findById(id);
+    }
 
-    public User getUserByPrincipal(Principal principal) {
-        return (User) userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+
+
+    public boolean authenticate(String email, String password) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            log.error("User not found with email: {}", email);
+            return false;
+        }
+
+        User user = userOptional.get();
+        boolean isMatch = passwordEncoder.matches(password, user.getPassword());
+
+        if (!isMatch) {
+            log.error("Password mismatch for user: {}", email);
+        }
+
+        return isMatch;
     }
 
 }

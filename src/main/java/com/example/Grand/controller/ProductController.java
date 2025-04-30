@@ -1,150 +1,205 @@
 package com.example.Grand.controller;
 
-import com.example.Grand.DTO.ProductDTO;
 import com.example.Grand.models.Comment;
 import com.example.Grand.models.Product;
 import com.example.Grand.models.User;
-import com.example.Grand.services.CommentService;
-import com.example.Grand.services.LikeService;
-import com.example.Grand.services.UserServices;
-import org.springframework.ui.Model;
-import com.example.Grand.services.ProductServices;
+import com.example.Grand.services.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-@Controller
+
+@RestController
+@RequestMapping("/api/products")
 @RequiredArgsConstructor
 public class ProductController {
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
+
     private final ProductServices productServices;
     private final UserServices userServices;
-    private final LikeService likeService;
     private final CommentService commentService;
+    private final LikeService likeService;
 
+    @Value("${test.user.id:1}")
+    private Long testUserId;
 
-    @GetMapping("/")
-    public String products(@RequestParam(name = "title", required = false) String title,
-                           Principal principal, Model model) {
-        List<Product> products = productServices.listProducts(title);
+    @GetMapping
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Get products", description = "Retrieve all products or filter by description")
+    public ResponseEntity<List<Product>> getProducts(@RequestParam(required = false) String description) {
+        return ResponseEntity.ok(productServices.listProducts(description));
+    }
 
-        Map<String, List<Comment>> productComments = new HashMap<>();
-        Set<Long> likedProductIds = new HashSet<>();
-        Map<String, Integer> likeCounts = new HashMap<>();
+    @GetMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Get product by ID", description = "Retrieve a product by its ID")
+    public ResponseEntity<Product> getProduct(@PathVariable Long id) {
+        return productServices.getById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        User user = principal != null ? productServices.getUserByPrincipal(principal) : new User();
-        model.addAttribute("user", user);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Create a product", description = "Create a product with description, one image, and one video")
+    public ResponseEntity<?> createProduct(
+            @RequestPart("product") String productJson,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "video", required = false) MultipartFile video) {
 
-        for (Product product : products) {
-            String productIdStr = String.valueOf(product.getId());
+        Optional<User> userOptional = userServices.getById(testUserId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Test user not found"));
+        }
 
-            // Комментарии
-            List<Comment> comments = commentService.getCommentsForProduct(product.getId());
-            productComments.put(productIdStr, comments);
+        // Валидация входных данных
+        if (productJson == null || productJson.isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Product JSON is required"));
+        }
 
-            // Количество лайков
-            likeCounts.put(productIdStr, likeService.getLikeCount(product));
+        // Парсинг JSON
+        ObjectMapper objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
 
-            // Проверка лайков текущего пользователя
-            if (principal != null && likeService.isProductLikedByUser(product, user)) {
-                likedProductIds.add(product.getId());
+        Product product;
+        try {
+            product = objectMapper.readValue(productJson, Product.class);
+        } catch (JsonProcessingException e) {
+            log.error("JSON parsing error", e);
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Invalid product JSON format", "details", e.getMessage()));
+        }
+
+        // Валидация файлов
+        try {
+            validateFile(image, "image", 10_000_000); // Макс 10MB для изображения
+            validateFile(video, "video", 50_000_000); // Макс 50MB для видео
+        } catch (IOException e) {
+            log.error("File validation failed", e);
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "File validation failed", "details", e.getMessage()));
+        }
+
+        // Сохранение продукта
+        try {
+            productServices.saveProduct(createPrincipal(userOptional.get()), product, image, video);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "Product saved successfully");
+            response.put("productId", product.getId());
+            response.put("imageUploaded", image != null && !image.isEmpty());
+            response.put("videoUploaded", video != null && !video.isEmpty());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error saving product", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to save product", "details", e.getMessage()));
+        }
+    }
+
+    private Principal createPrincipal(User user) {
+        return () -> user.getEmail();
+    }
+
+    private void validateFile(MultipartFile file, String fieldName, long maxSize) throws IOException {
+        if (file != null && !file.isEmpty()) {
+            if (file.getSize() > maxSize) {
+                throw new IOException(fieldName + " size exceeds maximum limit of " + maxSize + " bytes");
+            }
+            if (file.getBytes().length == 0) {
+                throw new IOException(fieldName + " is empty");
             }
         }
-
-        model.addAttribute("products", products);
-        model.addAttribute("productComments", productComments);
-        model.addAttribute("likedProductIds", likedProductIds);
-        model.addAttribute("likeCounts", likeCounts);
-
-        return "products";
-    }
-
-    @PostMapping("/logout")
-    public String logout() {
-        return "redirect:/login";
     }
 
 
-    @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable Long id, Model model, Principal principal) {
-        Product product = (Product) productServices.getById(id).orElseThrow();
-
-        model.addAttribute("product", product);
-        model.addAttribute("comments", commentService.getCommentsForProduct(id));
-        model.addAttribute("likeCount", likeService.getLikeCount(product));
-
-        return "redirect:/";
-    }
-    @GetMapping("/profile")
-    public String profile(Principal principal, Model model) {
-        if (principal == null) {
-            return "redirect:/login";
-        }
-        User user = productServices.getUserWithProductsByPrincipal(principal);
-        model.addAttribute("user", user);
-        model.addAttribute("products", user.getProducts());
-        return "profile";
-    }
-    @PostMapping("/product/add")
-    public String createProduct(@RequestParam("file1") MultipartFile file1,
-                                @RequestParam("file2") MultipartFile file2,
-                                @RequestParam("file3") MultipartFile file3, Product product, Principal principal) throws IOException {
-        productServices.saveProduct(principal, product, file1, file2, file3);
-        return "redirect:/";
-    }
-    @GetMapping("/product/delete/{id}")
-    public String deleteProduct(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Delete product", description = "Delete a product by its ID")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         productServices.deleteProduct(id);
-        return "redirect:/";
-    }
-    @GetMapping("/user/{id}")
-    public String userInfo(@PathVariable("id") Long id, Model model) {
-        User user = userServices.getUserWithProductsById(id); // <-- правильный вызов
-        model.addAttribute("user", user);
-        model.addAttribute("products", user.getProducts());
-        return "user-info";
+        return ResponseEntity.ok("Product deleted");
     }
 
-
-    @GetMapping("/products/edit/{id}")
-    public String editProductForm(@PathVariable Long id, Model model) {
-        Product product = productServices.findById(id);
-        model.addAttribute("product", product);
-        return "edit-product"; // Название шаблона
+    @GetMapping("/{id}/comments")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Get comments", description = "Retrieve comments for a product")
+    public ResponseEntity<List<Comment>> getComments(@PathVariable Long id) {
+        Optional<Product> productOptional = productServices.getById(id);
+        if (productOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Product product = productOptional.get();
+        return ResponseEntity.ok(product.getComments());
     }
 
+    @PostMapping("/{productId}/comments")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Add comment", description = "Add a comment to a product")
+    public ResponseEntity<?> addComment(@PathVariable Long productId, @RequestBody String content) {
+        Optional<User> userOptional = userServices.getById(testUserId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Тестовый пользователь не найден");
+        }
+        User user = userOptional.get();
 
-    @PostMapping("/products/{productId}/comment")
-    public String addComment(@PathVariable Long productId,
-                             @RequestParam String content,
-                             Principal principal) {
-        User user = userServices.getUserByPrincipal(principal); // получаем текущего юзера
-
-        Product product = productServices.getProductById(productId)  // получаем продукт
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+        Optional<Product> productOptional = productServices.getById(productId);
+        if (productOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Продукт не найден");
+        }
+        Product product = productOptional.get();
 
         Comment comment = new Comment();
         comment.setContent(content);
         comment.setProduct(product);
         comment.setUser(user);
 
-        commentService.save(comment); // сохраняем комментарий
-        return "redirect:/product/" + productId;
+        commentService.save(comment);
+        return ResponseEntity.ok("Comment added");
     }
 
+    @PostMapping("/{productId}/like")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Toggle like", description = "Toggle like for a product")
+    public ResponseEntity<?> toggleLike(@PathVariable Long productId) {
 
+        Optional<User> userOptional = userServices.getById(testUserId);
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Тестовый пользователь не найден");
+        }
+        User user = userOptional.get();
 
-    @PostMapping("/products/{productId}/like")
-    public String likeProduct(@PathVariable Long productId, Principal principal) {
-        User user = userServices.getUserByPrincipal(principal);
-        Product product = (Product) productServices.getById(productId).orElseThrow();
+        Optional<Product> productOptional = productServices.getById(productId);
+        if (productOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Продукт не найден");
+        }
+        Product product = productOptional.get();
 
         likeService.toggleLike(user, product);
-
-        return "redirect:/product/" + productId;
+        return ResponseEntity.ok("Like toggled");
     }
 }

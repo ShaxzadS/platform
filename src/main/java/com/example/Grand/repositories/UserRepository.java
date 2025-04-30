@@ -9,8 +9,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-
-
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.products WHERE u.email = :email")
     User findByEmailWithProducts(@Param("email") String email);
 
@@ -18,5 +16,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findByIdWithProducts(@Param("id") Long id);
 
-    Optional<Object> findByEmail(String name);
+    Optional<User> findByEmail(String email);
 }

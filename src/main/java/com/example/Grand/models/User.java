@@ -1,5 +1,6 @@
 package com.example.Grand.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import com.example.Grand.models.enums.Role;
 import lombok.*;
@@ -45,10 +46,12 @@ public  class User implements UserDetails {
 
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Like> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true
     , fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<Comment> comments = new ArrayList<>();
 
 

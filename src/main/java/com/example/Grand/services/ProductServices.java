@@ -3,9 +3,11 @@ package com.example.Grand.services;
 import com.example.Grand.models.Image;
 import com.example.Grand.models.Product;
 import com.example.Grand.models.User;
-import com.example.Grand.repositories.ProductRepository;
+import com.example.Grand.models.Video;
+import com.example.Grand.repositories.ImageRepository;
 import com.example.Grand.repositories.ProductRepository;
 import com.example.Grand.repositories.UserRepository;
+import com.example.Grand.repositories.VideoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,87 +27,91 @@ import java.util.Optional;
 public class ProductServices {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final ImageRepository imageRepository;
+    private final VideoRepository videoRepository;
+    private final UserServices userServices;
+
     @Transactional
-    public List<Product> listProducts(String title) {
-        if (title != null && !title.trim().isEmpty()) {
-            return productRepository.findByTitleContainingIgnoreCase(title);
+    public List<Product> listProducts(String description) {
+        if (description != null && !description.trim().isEmpty()) {
+            return productRepository.findByDescriptionContainingIgnoreCase(description);
         }
         return productRepository.findAll();
     }
 
-    public void saveProduct(Principal principal, Product product, MultipartFile file1, MultipartFile file2, MultipartFile file3) throws IOException {
-        product.setUser(getUserByPrincipal(principal));
-        Image image1;
-        Image image2;
-        Image image3;
-        if(file1.getSize()!=0){
-            image1 = toImageEntity(file1);
-            image1.setPreviewImage(true);
-            product.addImageToProduct(image1);
+    @Transactional
+    public void saveProduct(Principal principal, Product product, MultipartFile image, MultipartFile video) throws IOException {
+        try {
+            // 1. Сначала сохраняем продукт без изображения
+            product = productRepository.save(product);
+
+            // 2. Обрабатываем изображение
+            if (image != null && !image.isEmpty()) {
+                Image imageEntity = new Image();
+                // Явно копируем байты
+                byte[] bytes = Arrays.copyOf(image.getBytes(), image.getBytes().length);
+                imageEntity.setBytes(bytes);
+
+                // Остальные поля
+                imageEntity.setContentType(image.getContentType());
+                imageEntity.setOriginalFileName(image.getOriginalFilename());
+                imageEntity.setSize(image.getSize());
+                imageEntity.setName(image.getOriginalFilename());
+                imageEntity.setPreviewImage(true);
+                imageEntity.setProduct(product);
+
+                // Явно сохраняем изображение
+                imageRepository.saveAndFlush(imageEntity);
+                product.setImage(imageEntity);
+            }
+
+            // 3. Обновляем продукт
+            productRepository.saveAndFlush(product);
+
+        } catch (Exception e) {
+            log.error("Failed to save product", e);
+            throw new RuntimeException("Product save failed", e);
         }
-        if(file2.getSize()!=0){
-            image2 = toImageEntity(file2);
-            product.addImageToProduct(image2);
+    }
+
+
+    @Transactional
+    public Optional<User> getUserByPrincipal(Principal principal) {
+        if (principal == null) {
+            return Optional.empty();
         }
-        if(file3.getSize()!=0){
-            image3 = toImageEntity(file3);
-            product.addImageToProduct(image3);
-        }
-       log.info("Saving new product. Title:{}; Author: email: {}", product.getTitle(), product.getUser().getEmail());
-        Product productFromDB = productRepository.save(product);
-        productFromDB.setPreviewImageId(productFromDB.getImages().get(0).getId());
-        productRepository.save(product);
+        return Optional.ofNullable(userRepository.findByEmailWithProducts(principal.getName()));
+    }
+
+    private Image toImageEntity(MultipartFile file) throws IOException {
+        Image image = new Image();
+        image.setName(file.getOriginalFilename());
+        image.setOriginalFileName(file.getOriginalFilename());
+        image.setContentType(file.getContentType());
+        image.setSize(file.getSize());
+        image.setBytes(file.getBytes()); // <-- именно так, а не file.getSize()
+        return image;
+    }
+
+
+
+    private Video toVideoEntity(MultipartFile file) throws IOException {
+        Video video = new Video();
+        video.setName(file.getOriginalFilename());
+        video.setOriginalFileName(file.getOriginalFilename());
+        video.setContentType(file.getContentType());
+        video.setSize(file.getSize());
+        video.setBytes(file.getBytes());
+        return video;
     }
 
     @Transactional
-    public User getUserWithProductsByPrincipal(Principal principal) {
-        if (principal == null) return null;
-        return userRepository.findByEmailWithProducts(principal.getName());
-    }
-
-
-
-    @Transactional
-    public User getUserByPrincipal(Principal principal) {
-        if (principal==null) return null;
-        return userRepository.findByEmailWithProducts(principal.getName());
-    }
-
-    private Image toImageEntity(MultipartFile file) throws IOException{
-            Image image = new Image();
-            image.setName(file.getName());
-            image.setOriginalFileName(file.getOriginalFilename());
-            image.setContentType(file.getContentType());
-            image.setSize(file.getSize());
-            image.setBytes(file.getBytes());
-            return image;
-
-        }
-
-
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
     }
+
     @Transactional
-
-
-    public Product findById(Long id) {
-        return productRepository.findById(id).orElse(null);
-    }
-
-    public Object findAll() {
-        return productRepository.findAll();
-    }
-
-    public void deleteById(Long id) {
-        productRepository.deleteById(id);
-    }
-
-    public Optional<Object> getById(Long productId) {
-        return Optional.ofNullable(productRepository.findById(productId).orElse(null));
-    }
-
-    public Optional<Product> getProductById(Long id) {
+    public Optional<Product> getById(Long id) {
         return productRepository.findById(id);
     }
 
