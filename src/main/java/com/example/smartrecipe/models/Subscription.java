@@ -23,5 +23,29 @@ public class Subscription {
     @ManyToOne
     @JoinColumn(name = "target_id")
     private User target;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getSubscriber() {
+        return subscriber;
+    }
+
+    public void setSubscriber(User subscriber) {
+        this.subscriber = subscriber;
+    }
+
+    public User getTarget() {
+        return target;
+    }
+
+    public void setTarget(User target) {
+        this.target = target;
+    }
 }
 

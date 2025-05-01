@@ -4,7 +4,6 @@ import com.example.Grand.models.User;
 import com.example.Grand.models.enums.Role;
 import com.example.Grand.services.UserServices;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +13,20 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
-@RequiredArgsConstructor
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
 public class AdminController {
 
     private final UserServices userServices;
 
     // Получить список всех пользователей
+
+
+    public AdminController(UserServices userServices) {
+        this.userServices = userServices;
+    }
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/users")
+
     public ResponseEntity<List<User>> getUsers() {
         return ResponseEntity.ok(userServices.list());
     }

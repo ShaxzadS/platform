@@ -57,4 +57,68 @@ public class Image {
         result = 31 * result + Arrays.hashCode(bytes);
         return result;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getOriginalFileName() {
+        return originalFileName;
+    }
+
+    public void setOriginalFileName(String originalFileName) {
+        this.originalFileName = originalFileName;
+    }
+
+    public Long getSize() {
+        return size;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
+    public boolean isPreviewImage() {
+        return isPreviewImage;
+    }
+
+    public void setPreviewImage(boolean previewImage) {
+        isPreviewImage = previewImage;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
 }

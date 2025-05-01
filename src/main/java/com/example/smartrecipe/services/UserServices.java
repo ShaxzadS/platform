@@ -5,6 +5,7 @@ import com.example.Grand.models.enums.Role;
 import com.example.Grand.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class UserServices {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
 
     public Optional<User> getUserByPrincipal(Principal principal) {
         if (principal == null) {
