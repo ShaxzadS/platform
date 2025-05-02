@@ -1,4 +1,4 @@
-package com.example.Grand.models;
+package com.example.smartrecipe.models;
 
 import jakarta.persistence.*;
 import lombok.*;

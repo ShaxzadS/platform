@@ -1,4 +1,4 @@
-package com.example.Grand.models;
+package com.example.smartrecipe.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

@@ -1,5 +1,5 @@
-package com.example.Grand.configuration;
-import com.example.Grand.util.JwtAuthFilter;
+package com.example.smartrecipe.configuration;
+import com.example.smartrecipe.util.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;

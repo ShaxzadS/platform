@@ -1,9 +1,10 @@
-package com.example.Grand.services;
+package com.example.smartrecipe.services;
 
-import com.example.Grand.models.Message;
-import com.example.Grand.models.User;
-import com.example.Grand.repositories.MessageRepository;
+import com.example.smartrecipe.models.Message;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.repositories.MessageRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,11 +12,17 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
-@RequiredArgsConstructor
 public class MessageService {
     private final MessageRepository messageRepository;
     private final NotificationService notificationService;
 
+
+
+    @Autowired
+    public MessageService(MessageRepository messageRepository, NotificationService notificationService) {
+        this.messageRepository = messageRepository;
+        this.notificationService = notificationService;
+    }
     public Message sendMessage(User sender, User receiver, String content) {
         if (content == null || content.trim().isEmpty()) {
             throw new IllegalArgumentException("Сообщение не может быть пустым");

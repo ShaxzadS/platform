@@ -1,21 +1,28 @@
-package com.example.Grand.services;
+package com.example.smartrecipe.services;
 
-import com.example.Grand.models.Comment;
-import com.example.Grand.models.Product;
-import com.example.Grand.models.User;
-import com.example.Grand.repositories.CommentRepository;
+import com.example.smartrecipe.models.Comment;
+import com.example.smartrecipe.models.Product;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.repositories.CommentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+
 public class CommentService {
 
     private final CommentRepository commentRepository;
     private final NotificationService notificationService; // Добавляем зависимость
 
+
+    @Autowired
+    public CommentService(CommentRepository commentRepository, NotificationService notificationService) {
+        this.commentRepository = commentRepository;
+        this.notificationService = notificationService;
+    }
     public List<Comment> getCommentsForProduct(Long productId) {
         return commentRepository.findByProductIdOrderByCreatedAtDesc(productId);
     }

@@ -1,12 +1,13 @@
-package com.example.Grand.controller;
+package com.example.smartrecipe.controller;
 
-import com.example.Grand.models.User;
-import com.example.Grand.services.EmailService;
-import com.example.Grand.services.UserServices;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.services.EmailService;
+import com.example.smartrecipe.services.UserServices;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import com.example.Grand.services.JwtTokenService;
+import com.example.smartrecipe.services.JwtTokenService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,12 +15,19 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor
 public class UserRestController {
 
     private final UserServices userServices;
     private final EmailService emailService;
     private final JwtTokenService jwtTokenService;
+
+
+    @Autowired
+    public UserRestController(UserServices userServices, EmailService emailService, JwtTokenService jwtTokenService) {
+        this.userServices = userServices;
+        this.emailService = emailService;
+        this.jwtTokenService = jwtTokenService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {

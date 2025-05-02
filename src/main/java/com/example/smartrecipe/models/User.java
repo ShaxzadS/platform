@@ -1,8 +1,8 @@
-package com.example.Grand.models;
+package com.example.smartrecipe.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import com.example.Grand.models.enums.Role;
+import com.example.smartrecipe.models.enums.Role;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

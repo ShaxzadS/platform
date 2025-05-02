@@ -1,8 +1,8 @@
-package com.example.Grand.controller;
+package com.example.smartrecipe.controller;
 
-import com.example.Grand.models.User;
-import com.example.Grand.models.enums.Role;
-import com.example.Grand.services.UserServices;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.models.enums.Role;
+import com.example.smartrecipe.services.UserServices;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

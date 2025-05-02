@@ -1,8 +1,8 @@
-package com.example.Grand.util;
+package com.example.smartrecipe.util;
 
 
 
-import com.example.Grand.services.JwtTokenService;
+import com.example.smartrecipe.services.JwtTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

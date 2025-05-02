@@ -1,11 +1,11 @@
-package com.example.Grand.services;
+package com.example.smartrecipe.services;
 
-import com.example.Grand.models.User;
-import com.example.Grand.models.enums.Role;
-import com.example.Grand.repositories.UserRepository;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.models.enums.Role;
+import com.example.smartrecipe.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,14 +13,26 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
+//@Slf4j
 public class UserServices {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private static final Logger log = LoggerFactory.getLogger(UserServices.class);
 
+
+
+    @Autowired
+    public UserServices(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public Optional<User> getUserByPrincipal(Principal principal) {
         if (principal == null) {

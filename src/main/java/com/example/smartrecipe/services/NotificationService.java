@@ -1,19 +1,25 @@
-package com.example.Grand.services;
+package com.example.smartrecipe.services;
 
-import com.example.Grand.models.Notification;
-import com.example.Grand.models.User;
-import com.example.Grand.models.enums.NotificationType;
-import com.example.Grand.repositories.NotificationRepository;
+import com.example.smartrecipe.models.Notification;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.models.enums.NotificationType;
+import com.example.smartrecipe.repositories.NotificationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 
+
+
+    @Autowired
+    public NotificationService(NotificationRepository notificationRepository) {
+        this.notificationRepository = notificationRepository;
+    }
     public List<Notification> getNotificationsForUser(User user) {
         return notificationRepository.findByRecipientOrderByCreatedAtDesc(user);
     }

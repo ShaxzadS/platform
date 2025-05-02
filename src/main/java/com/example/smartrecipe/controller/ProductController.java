@@ -1,22 +1,22 @@
-package com.example.Grand.controller;
+package com.example.smartrecipe.controller;
 
-import com.example.Grand.models.Comment;
-import com.example.Grand.models.Product;
-import com.example.Grand.models.User;
-import com.example.Grand.services.*;
+import com.example.smartrecipe.models.Comment;
+import com.example.smartrecipe.models.Product;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.services.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +30,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/products")
-@RequiredArgsConstructor
 public class ProductController {
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
@@ -39,6 +38,16 @@ public class ProductController {
     private final CommentService commentService;
     private final LikeService likeService;
 
+
+
+    @Autowired
+    public ProductController(ProductServices productServices, UserServices userServices,
+                             CommentService commentService, LikeService likeService) {
+        this.productServices = productServices;
+        this.userServices = userServices;
+        this.commentService = commentService;
+        this.likeService = likeService;
+    }
     @Value("${test.user.id:1}")
     private Long testUserId;
 

@@ -1,4 +1,4 @@
-package com.example.Grand;
+package com.example.smartrecipe;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,6 +1,6 @@
-package com.example.Grand.models;
+package com.example.smartrecipe.models;
 
-import com.example.Grand.models.enums.NotificationType;
+import com.example.smartrecipe.models.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -92,4 +92,9 @@ public class Notification {
     public void setRead(Boolean read) {
         isRead = read;
     }
+
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
+
 }

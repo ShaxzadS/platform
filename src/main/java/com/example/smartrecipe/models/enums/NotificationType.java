@@ -1,4 +1,4 @@
-package com.example.Grand.models.enums;
+package com.example.smartrecipe.models.enums;
 
 public enum NotificationType {
     FOLLOW, LIKE, MESSAGE, COMMENT

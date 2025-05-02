@@ -1,8 +1,8 @@
-package com.example.Grand.repositories;
+package com.example.smartrecipe.repositories;
 
-import com.example.Grand.models.Like;
-import com.example.Grand.models.Product;
-import com.example.Grand.models.User;
+import com.example.smartrecipe.models.Like;
+import com.example.smartrecipe.models.Product;
+import com.example.smartrecipe.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

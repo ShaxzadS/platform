@@ -1,6 +1,6 @@
-package com.example.Grand.repositories;
-import com.example.Grand.models.Subscription;
-import com.example.Grand.models.User;
+package com.example.smartrecipe.repositories;
+import com.example.smartrecipe.models.Subscription;
+import com.example.smartrecipe.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

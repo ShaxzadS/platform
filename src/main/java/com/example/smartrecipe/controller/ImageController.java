@@ -1,9 +1,9 @@
-    package com.example.Grand.controller;
+    package com.example.smartrecipe.controller;
 
-    import com.example.Grand.models.Image;
-    import com.example.Grand.repositories.ImageRepository;
+    import com.example.smartrecipe.repositories.ImageRepository;
     import io.swagger.v3.oas.annotations.security.SecurityRequirement;
     import lombok.RequiredArgsConstructor;
+    import org.springframework.beans.factory.annotation.Autowired;
     import org.springframework.core.io.InputStreamResource;
     import org.springframework.http.HttpHeaders;
     import org.springframework.http.MediaType;
@@ -14,10 +14,15 @@
 
     @RestController
     @RequestMapping("/api/images")
-    @RequiredArgsConstructor
     public class ImageController {
 
         private final ImageRepository imageRepository;
+
+
+        @Autowired
+        public ImageController(ImageRepository imageRepository) {
+            this.imageRepository = imageRepository;
+        }
 
         @GetMapping("/{id}")
         @SecurityRequirement(name = "bearerAuth")

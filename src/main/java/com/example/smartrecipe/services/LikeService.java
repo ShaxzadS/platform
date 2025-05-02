@@ -1,21 +1,28 @@
-package com.example.Grand.services;
+package com.example.smartrecipe.services;
 
-import com.example.Grand.models.Like;
-import com.example.Grand.models.Product;
-import com.example.Grand.models.User;
-import com.example.Grand.repositories.LikeRepository;
+import com.example.smartrecipe.models.Like;
+import com.example.smartrecipe.models.Product;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.repositories.LikeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class LikeService {
 
     private final LikeRepository likeRepository;
     private final NotificationService notificationService; // Добавляем зависимость
 
+
+
+    @Autowired
+    public LikeService(LikeRepository likeRepository, NotificationService notificationService) {
+        this.likeRepository = likeRepository;
+        this.notificationService = notificationService;
+    }
     public boolean toggleLike(User user, Product product) {
         Optional<Like> existing = likeRepository.findByUserIdAndProductId(user.getId(), product.getId());
         if (existing.isPresent()) {

@@ -1,10 +1,11 @@
-package com.example.Grand.controller;
+package com.example.smartrecipe.controller;
 
-import com.example.Grand.models.User;
-import com.example.Grand.services.SubscriptionService;
-import com.example.Grand.services.UserServices;
-import com.example.Grand.services.NotificationService;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.services.SubscriptionService;
+import com.example.smartrecipe.services.UserServices;
+import com.example.smartrecipe.services.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,13 +13,20 @@ import java.security.Principal;
 import java.util.Optional;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/subscriptions")
 public class SubscriptionController {
     private final UserServices userServices;
     private final SubscriptionService subscriptionService;
     private final NotificationService notificationService;
 
+
+
+    @Autowired
+    public SubscriptionController(UserServices userServices, SubscriptionService subscriptionService, NotificationService notificationService) {
+        this.userServices = userServices;
+        this.subscriptionService = subscriptionService;
+        this.notificationService = notificationService;
+    }
     @PostMapping("/subscribe/{userId}")
     public ResponseEntity<?> subscribe(@PathVariable Long userId, Principal principal) {
         if (principal == null) {

@@ -1,4 +1,4 @@
-package com.example.Grand.services;
+package com.example.smartrecipe.services;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

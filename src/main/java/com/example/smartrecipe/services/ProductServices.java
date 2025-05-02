@@ -1,29 +1,29 @@
-package com.example.Grand.services;
+package com.example.smartrecipe.services;
 
-import com.example.Grand.models.Image;
-import com.example.Grand.models.Product;
-import com.example.Grand.models.User;
-import com.example.Grand.models.Video;
-import com.example.Grand.repositories.ImageRepository;
-import com.example.Grand.repositories.ProductRepository;
-import com.example.Grand.repositories.UserRepository;
-import com.example.Grand.repositories.VideoRepository;
+import com.example.smartrecipe.models.Image;
+import com.example.smartrecipe.models.Product;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.models.Video;
+import com.example.smartrecipe.repositories.ImageRepository;
+import com.example.smartrecipe.repositories.ProductRepository;
+import com.example.smartrecipe.repositories.UserRepository;
+import com.example.smartrecipe.repositories.VideoRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Slf4j
-@RequiredArgsConstructor
 public class ProductServices {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
@@ -31,6 +31,19 @@ public class ProductServices {
     private final VideoRepository videoRepository;
     private final UserServices userServices;
 
+
+
+    @Autowired
+    public ProductServices(ProductRepository productRepository, UserRepository userRepository,
+                           ImageRepository imageRepository, VideoRepository videoRepository,
+                           UserServices userServices) {
+        this.productRepository = productRepository;
+        this.userRepository = userRepository;
+        this.imageRepository = imageRepository;
+        this.videoRepository = videoRepository;
+        this.userServices = userServices;
+    }
+    private static final Logger log = LoggerFactory.getLogger(ProductServices.class);
     @Transactional
     public List<Product> listProducts(String description) {
         if (description != null && !description.trim().isEmpty()) {

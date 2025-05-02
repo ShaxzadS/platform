@@ -1,11 +1,12 @@
-package com.example.Grand.controller;
+package com.example.smartrecipe.controller;
 
-import com.example.Grand.models.Message;
-import com.example.Grand.models.User;
-import com.example.Grand.services.MessageService;
-import com.example.Grand.services.UserServices;
+import com.example.smartrecipe.models.Message;
+import com.example.smartrecipe.models.User;
+import com.example.smartrecipe.services.MessageService;
+import com.example.smartrecipe.services.UserServices;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +15,17 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/messages")
 public class MessageController {
     private final UserServices userServices;
     private final MessageService messageService;
 
+
+    @Autowired
+    public MessageController(UserServices userServices, MessageService messageService) {
+        this.userServices = userServices;
+        this.messageService = messageService;
+    }
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getMessages(@RequestParam(required = false) Long withUserId, Principal principal) {
