@@ -1,4 +1,12 @@
+# Используем официальный образ JDK
 FROM openjdk:17-jdk-slim
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java","-jar","/app.jar"]
+
+# Копируем jar-файл в контейнер
+COPY target/*.jar app.jar
+
+
+# Порт, который будет слушать приложение
+EXPOSE 8080
+
+# Команда запуска
+ENTRYPOINT ["java", "-jar", "app.jar"]
