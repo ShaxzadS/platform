@@ -2,7 +2,8 @@
 FROM openjdk:17-jdk-slim
 
 # Копируем jar-файл в контейнер
-COPY target/*.jar app.jar
+COPY app.jar app.jar
+
 
 
 # Порт, который будет слушать приложение
