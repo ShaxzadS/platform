@@ -7,7 +7,7 @@ COPY app.jar app.jar
 
 
 # Порт, который будет слушать приложение
-EXPOSE 8002
+EXPOSE 10000
 
 
 ENV SPRING_PROFILES_ACTIVE=prod
