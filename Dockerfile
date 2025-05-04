@@ -7,7 +7,10 @@ COPY app.jar app.jar
 
 
 # Порт, который будет слушать приложение
-EXPOSE 8080
+EXPOSE 8002
+
+
+ENV SPRING_PROFILES_ACTIVE=prod
 
 # Команда запуска
 ENTRYPOINT ["java", "-jar", "app.jar"]
