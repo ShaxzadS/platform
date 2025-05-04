@@ -36,14 +36,10 @@ public class UserRestController {
             return ResponseEntity.badRequest().body("User with email already exists: " + user.getEmail());
         }
 
-        emailService.sendSimpleEmail(
-                user.getEmail(),
-                "Добро пожаловать в Grand!",
-                "Привет, " + user.getName() + "! Спасибо за регистрацию на нашем сайте."
-        );
-
+        // Убрали отправку email
         return ResponseEntity.ok("User registered successfully!");
     }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         if (userServices.authenticate(user.getEmail(), user.getPassword())) {

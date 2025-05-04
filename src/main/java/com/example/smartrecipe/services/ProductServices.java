@@ -51,34 +51,34 @@ public class ProductServices {
         }
         return productRepository.findAll();
     }
-
     @Transactional
     public void saveProduct(Principal principal, Product product, MultipartFile image, MultipartFile video) throws IOException {
         try {
-            // 1. Сначала сохраняем продукт без изображения
+            // 1. Находим пользователя
+            User user = userServices.getUserByPrincipal(principal)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            product.setUser(user);
+
+            // 2. Сохраняем продукт без файлов
             product = productRepository.save(product);
 
-            // 2. Обрабатываем изображение
+            // 3. Обрабатываем изображение
             if (image != null && !image.isEmpty()) {
-                Image imageEntity = new Image();
-                // Явно копируем байты
-                byte[] bytes = Arrays.copyOf(image.getBytes(), image.getBytes().length);
-                imageEntity.setBytes(bytes);
-
-                // Остальные поля
-                imageEntity.setContentType(image.getContentType());
-                imageEntity.setOriginalFileName(image.getOriginalFilename());
-                imageEntity.setSize(image.getSize());
-                imageEntity.setName(image.getOriginalFilename());
-                imageEntity.setPreviewImage(true);
+                Image imageEntity = toImageEntity(image);
                 imageEntity.setProduct(product);
-
-                // Явно сохраняем изображение
                 imageRepository.saveAndFlush(imageEntity);
                 product.setImage(imageEntity);
             }
 
-            // 3. Обновляем продукт
+            // 4. Обрабатываем видео
+            if (video != null && !video.isEmpty()) {
+                Video videoEntity = toVideoEntity(video);
+                videoEntity.setProduct(product);
+                videoRepository.saveAndFlush(videoEntity);
+                product.setVideo(videoEntity);
+            }
+
+            // 5. Сохраняем продукт уже с файлам
             productRepository.saveAndFlush(product);
 
         } catch (Exception e) {
@@ -86,6 +86,27 @@ public class ProductServices {
             throw new RuntimeException("Product save failed", e);
         }
     }
+
+    private Image toImageEntity(MultipartFile image) throws IOException {
+        Image imageEntity = new Image();
+        imageEntity.setName(image.getOriginalFilename());
+        imageEntity.setOriginalFileName(image.getOriginalFilename());
+        imageEntity.setSize(image.getSize());
+        imageEntity.setContentType(image.getContentType());
+        imageEntity.setBytes(image.getBytes()); // Сохраняем как массив байтов
+        return imageEntity;
+    }
+
+    private Video toVideoEntity(MultipartFile video) throws IOException {
+        Video videoEntity = new Video();
+        videoEntity.setName(video.getOriginalFilename());
+        videoEntity.setOriginalFileName(video.getOriginalFilename());
+        videoEntity.setSize(video.getSize());
+        videoEntity.setContentType(video.getContentType());
+        videoEntity.setBytes(video.getBytes()); // Сохраняем как массив байтов
+        return videoEntity;
+    }
+
 
 
     @Transactional
@@ -96,27 +117,7 @@ public class ProductServices {
         return Optional.ofNullable(userRepository.findByEmailWithProducts(principal.getName()));
     }
 
-    private Image toImageEntity(MultipartFile file) throws IOException {
-        Image image = new Image();
-        image.setName(file.getOriginalFilename());
-        image.setOriginalFileName(file.getOriginalFilename());
-        image.setContentType(file.getContentType());
-        image.setSize(file.getSize());
-        image.setBytes(file.getBytes()); // <-- именно так, а не file.getSize()
-        return image;
-    }
 
-
-
-    private Video toVideoEntity(MultipartFile file) throws IOException {
-        Video video = new Video();
-        video.setName(file.getOriginalFilename());
-        video.setOriginalFileName(file.getOriginalFilename());
-        video.setContentType(file.getContentType());
-        video.setSize(file.getSize());
-        video.setBytes(file.getBytes());
-        return video;
-    }
 
     @Transactional
     public void deleteProduct(Long id) {
