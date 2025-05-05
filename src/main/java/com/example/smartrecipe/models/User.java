@@ -89,6 +89,13 @@ public  class User implements UserDetails {
         return active;
     }
 
+    public String getRepeatPassword() {
+        return repeatPassword;
+    }
+
+    public void setRepeatPassword(String repeatPassword) {
+        this.repeatPassword = repeatPassword;
+    }
 
     public Long getId() {
         return id;

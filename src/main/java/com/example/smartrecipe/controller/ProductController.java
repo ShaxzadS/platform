@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/products")
-@RequiredArgsConstructor
+
 public class ProductController {
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
@@ -36,6 +37,17 @@ public class ProductController {
     private final CommentService commentService;
     private final LikeService likeService;
     private final ObjectMapper objectMapper;
+
+
+    @Autowired
+    public ProductController(ProductServices productServices, UserServices userServices,CommentService commentService, LikeService likeService, ObjectMapper objectMapper) {
+        this.productServices = productServices;
+        this.userServices = userServices;
+        this.commentService = commentService;
+        this.likeService = likeService;
+        this.objectMapper = objectMapper;
+    }
+
 
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
