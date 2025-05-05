@@ -33,6 +33,10 @@ public  class User implements UserDetails {
     private boolean active;
     @Column(name = "password",length = 1000)
     private String password;
+
+    @Transient
+    private String repeatPassword;
+
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role",
             joinColumns = @JoinColumn (name = "user_id"))

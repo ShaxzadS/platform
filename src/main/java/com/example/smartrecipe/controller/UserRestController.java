@@ -1,7 +1,7 @@
 package com.example.smartrecipe.controller;
 
 import com.example.smartrecipe.models.User;
-import com.example.smartrecipe.services.EmailService;
+// import com.example.smartrecipe.services.EmailService;
 import com.example.smartrecipe.services.UserServices;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -18,27 +18,31 @@ import java.util.Map;
 public class UserRestController {
 
     private final UserServices userServices;
-    private final EmailService emailService;
+   // private final EmailService emailService;
     private final JwtTokenService jwtTokenService;
 
 
     @Autowired
-    public UserRestController(UserServices userServices, EmailService emailService, JwtTokenService jwtTokenService) {
+    public UserRestController(UserServices userServices, JwtTokenService jwtTokenService) {
         this.userServices = userServices;
-        this.emailService = emailService;
+       // this.emailService = emailService;
         this.jwtTokenService = jwtTokenService;
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (!user.getPassword().equals(user.getRepeatPassword())) {
+            return ResponseEntity.badRequest().body("Passwords do not match");
+        }
+
         boolean created = userServices.createUser(user);
         if (!created) {
             return ResponseEntity.badRequest().body("User with email already exists: " + user.getEmail());
         }
 
-        // Убрали отправку email
         return ResponseEntity.ok("User registered successfully!");
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
