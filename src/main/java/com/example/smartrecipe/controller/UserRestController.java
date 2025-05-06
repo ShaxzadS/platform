@@ -1,7 +1,7 @@
 package com.example.smartrecipe.controller;
 
 import com.example.smartrecipe.models.User;
-import com.example.smartrecipe.services.EmailService;
+//import com.example.smartrecipe.services.EmailService;
 import com.example.smartrecipe.services.UserServices;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +18,14 @@ import java.util.Map;
 public class UserRestController {
 
     private final UserServices userServices;
-    private final EmailService emailService;
+  //  private final EmailService emailService;
     private final JwtTokenService jwtTokenService;
 
 
     @Autowired
-    public UserRestController(UserServices userServices, EmailService emailService, JwtTokenService jwtTokenService) {
+    public UserRestController(UserServices userServices, JwtTokenService jwtTokenService) {
         this.userServices = userServices;
-        this.emailService = emailService;
+      //  this.emailService = emailService;
         this.jwtTokenService = jwtTokenService;
     }
 
@@ -40,15 +40,9 @@ public class UserRestController {
             return ResponseEntity.badRequest().body("User with email already exists: " + user.getEmail());
         }
 
-        // Письмо отправляем только после успешного создания пользователя
-        emailService.sendSimpleEmail(
-                user.getEmail(),
-                "Welcome to SmartRecipe!",
-                "Hello " + user.getName() + ",\n\nThank you for registering at SmartRecipe!"
-        );
-
-        return ResponseEntity.ok("User registered successfully! Confirmation email sent.");
+        return ResponseEntity.ok("User registered successfully!");
     }
+
 
 
 
