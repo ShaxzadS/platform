@@ -29,19 +29,19 @@ public class UserRestController {
         this.jwtTokenService = jwtTokenService;
     }
 
-//    @PostMapping("/register")
-//    public ResponseEntity<?> registerUser(@RequestBody User user) {
-//        if (!user.getPassword().equals(user.getRepeatPassword())) {
-//            return ResponseEntity.badRequest().body("Passwords do not match");
-//        }
-//
-//        boolean created = userServices.createUser(user);
-//        if (!created) {
-//            return ResponseEntity.badRequest().body("User with email already exists: " + user.getEmail());
-//        }
-//
-//        return ResponseEntity.ok("User registered successfully!");
-//    }
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (!user.getPassword().equals(user.getRepeatPassword())) {
+            return ResponseEntity.badRequest().body("Passwords do not match");
+        }
+
+        boolean created = userServices.createUser(user);
+        if (!created) {
+            return ResponseEntity.badRequest().body("User with email already exists: " + user.getEmail());
+        }
+
+        return ResponseEntity.ok("User registered successfully!");
+    }
 
 
 
