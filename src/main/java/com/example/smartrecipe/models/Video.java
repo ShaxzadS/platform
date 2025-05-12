@@ -1,18 +1,21 @@
 package com.example.smartrecipe.models;
 
 import jakarta.persistence.*;
-import lombok.*;
+
+import java.util.Arrays;
+import java.util.Objects;
 
 @Entity
 @Table(name = "videos")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @Lob
+    @Column(name = "bytes")
+    private byte[] bytes;
 
     @Column(name = "name")
     private String name;
@@ -26,14 +29,9 @@ public class Video {
     @Column(name = "content_type")
     private String contentType;
 
-    @Lob
-    @Column(name = "bytes", columnDefinition = "bytea")
-    private byte[] bytes;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
-
 
     public Long getId() {
         return id;
@@ -89,5 +87,26 @@ public class Video {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Video video = (Video) o;
+        return Objects.equals(id, video.id) &&
+                Objects.equals(name, video.name) &&
+                Objects.equals(originalFileName, video.originalFileName) &&
+                Objects.equals(size, video.size) &&
+                Objects.equals(contentType, video.contentType) &&
+                Arrays.equals(bytes, video.bytes) &&
+                Objects.equals(product, video.product);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(id, name, originalFileName, size, contentType, product);
+        result = 31 * result + Arrays.hashCode(bytes);
+        return result;
     }
 }

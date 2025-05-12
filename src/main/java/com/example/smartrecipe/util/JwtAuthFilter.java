@@ -27,6 +27,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getServletPath();
 
+
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (
                 path.equals("/api/users/register") ||
                         path.equals("/api/users/login") ||
@@ -41,7 +47,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -55,10 +60,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 👇 ВАЖНО: Устанавливаем Authentication в SecurityContext
         String username = jwtService.getUsernameFromToken(token);
         if (username != null) {
-            // Без ролей, если они не нужны. Если нужны — можно добавить SimpleGrantedAuthority
             var auth = new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
                     username,
                     null,

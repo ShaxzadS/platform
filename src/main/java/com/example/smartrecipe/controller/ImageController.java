@@ -29,10 +29,13 @@
         public ResponseEntity<?> getImageById(@PathVariable Long id) {
             return imageRepository.findById(id)
                     .map(image -> {
+                        // Получаем тип контента по расширению файла (например, для jpg, png и т. д.)
+                        String contentType = "image/jpeg"; // Можно добавить логику для других типов файлов
+
                         return ResponseEntity.ok()
-                                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + image.getOriginalFileName() + "\"")
-                                .contentType(MediaType.parseMediaType(image.getContentType()))
-                                .contentLength(image.getSize())
+                                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\""  + "\"")
+                                .contentType(MediaType.parseMediaType(contentType)) // Устанавливаем тип контента
+                                .contentLength(image.getBytes().length) // Размер файла в байтах
                                 .body(new InputStreamResource(new ByteArrayInputStream(image.getBytes())));
                     })
                     .orElse(ResponseEntity.notFound().build());

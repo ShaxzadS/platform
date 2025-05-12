@@ -137,6 +137,7 @@ public class ProductController {
         }
     }
 
+
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete product", description = "Delete a product by its ID")
