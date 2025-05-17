@@ -113,12 +113,13 @@ public class UserServices {
     }
 
 
+    @Transactional
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
 
-
+    @Transactional
     public boolean authenticate(String email, String password) {
         Optional<User> userOptional = userRepository.findByEmail(email);
 
@@ -136,5 +137,17 @@ public class UserServices {
 
         return isMatch;
     }
+    @Transactional
+    public void save(User user) {
+        userRepository.save(user);
+    }
+    public Optional<User> getProfile(Principal principal) {
+        if (principal == null) {
+            return Optional.empty();
+        }
+        String email = principal.getName();
+        return userRepository.findByEmail(email);
+    }
+
 
 }

@@ -59,6 +59,28 @@ public  class User implements UserDetails {
     private List<Comment> comments = new ArrayList<>();
 
 
+    @Column(name = "bio")
+    private String bio;
+
+    @Lob
+    @Column(name = "avatar_data")
+    private byte[] avatarData;
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public byte[] getAvatarData() {
+        return avatarData;
+    }
+
+    public void setAvatarData(byte[] avatarData) {
+        this.avatarData = avatarData;
+    }
+
     @PrePersist
     public void init(){
         dateOfCreated = LocalDateTime.now();
