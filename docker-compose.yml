@@ -9,7 +9,7 @@ services:
     ports:
       - "8002:10000"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-d0ke3nvfte5s738kb5dg-a.singapore-postgres.render.com:5432/recipe_s6jd
+      SPRING_DATASOURCE_URL:  jdbc:postgresql://dpg-d0ke3nvfte5s738kb5dg-a.singapore-postgres.render.com:5432/recipe_s6jd
       SPRING_DATASOURCE_USERNAME: recipe_s6jd_user
       SPRING_DATASOURCE_PASSWORD: zv3pgOea6hhgEE65LAqOe2Ks5Nanv6Ac
       SERVER_PORT: 10000
