@@ -5,11 +5,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: backend_app
+    container_name: smart_resips
     ports:
       - "8002:10000"
     environment:
-      SPRING_DATASOURCE_URL:  jdbc:postgresql://dpg-d0ke3nvfte5s738kb5dg-a.singapore-postgres.render.com:5432/recipe_s6jd
-      SPRING_DATASOURCE_USERNAME: recipe_s6jd_user
-      SPRING_DATASOURCE_PASSWORD: zv3pgOea6hhgEE65LAqOe2Ks5Nanv6Ac
+      SPRING_DATASOURCE_URL: jdbc:postgresql://dpg-d0krj4ggjchc73ej5n50-a.singapore-postgres.render.com:5432/recipe_o3z7
+      SPRING_DATASOURCE_USERNAME: recipe_o3z7_user
+      SPRING_DATASOURCE_PASSWORD: kfYWFMYHEZJ3nBR2S7Wj7IcPyUqIRaI5
       SERVER_PORT: 10000
